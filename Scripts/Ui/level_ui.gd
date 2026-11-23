@@ -48,6 +48,8 @@ func show_briefing(lv: Dictionary, idx: int, total: int) -> void:
 	_rule(box)
 	for t in lv["tips"]:
 		_text(box, "-  " + String(t), 13, Color(1, 1, 1, 0.85), HORIZONTAL_ALIGNMENT_LEFT)
+	_rule(box)
+	_text(box, "Cuando cumplas los objetivos, ve a la %s: la zona con la bandera. Una flecha te guiará." % String(lv.get("goal_label", "META")), 13, GREEN)
 	_button(box, "Comenzar", GREEN, "go")
 	await chosen
 

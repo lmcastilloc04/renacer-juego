@@ -18,11 +18,12 @@ const DATA_PATH: String = "res://Data/levels.json"
 const ORIGIN: Vector2 = Vector2(-288.0, 1392.0)
 const CELL: float = 16.0
 const LEGACY_NODES: Array[String] = ["TileMapLayer_Mountain", "TileMapLayer_Renacer", "Map_help", "WallMaster"]
-const DYNAMIC_GROUPS: Array[String] = ["edificios", "interactuables", "civiles", "zonas", "escombros"]
+const DYNAMIC_GROUPS: Array[String] = ["edificios", "interactuables", "civiles", "zonas", "escombros", "metas"]
 const SCRIPT_BUILDING: String = "res://Scripts/Game/building.gd"
 const SCRIPT_INTERACTABLE: String = "res://Scripts/Game/interactable.gd"
 const SCRIPT_ZONE: String = "res://Scripts/Game/restricted_zone.gd"
 const SCRIPT_RUBBLE: String = "res://Scripts/Game/rubble.gd"
+const SCRIPT_MARKER: String = "res://Scripts/Game/goal_marker.gd"
 const TEXTURE: Texture2D = preload("res://Assets/Kenney/tilemap_packed.png")
 
 var index: int = 0
@@ -47,6 +48,11 @@ var _tremor_timer: float = 0.0
 var _check_timer: float = 0.0
 var _goal_msg_cooldown: float = 0.0
 var _summaries: Array = []
+var _goal_rect: Rect2 = Rect2()
+var _in_goal: bool = false
+var _obj_timer: float = 0.0
+var _obj_sig: String = ""
+var _rubble_total: int = 0
 
 
 func _ready() -> void:
@@ -201,6 +207,16 @@ func _build_level(i: int) -> void:
 	GameManager.stat("bld_total", GameManager.total_buildings())
 	GameManager.stat("civ_total", GameManager.total_civilians())
 	_max_points = _compute_max_points(level)
+	_rubble_total = 0
+	for r in level["rubble"]:
+		if bool(r["route"]):
+			_rubble_total += 1
+	GameManager.goal_label = String(level.get("goal_label", "META"))
+	GameManager.goal_ready = false
+	_in_goal = false
+	_obj_sig = ""
+	_obj_timer = 0.0
+	_update_objectives()
 	var tr: Variant = level.get("tremors")
 	_tremor_timer = randf_range(float(tr[0]), float(tr[1])) + 8.0 if tr != null else -1.0
 	_check_timer = 1.0
@@ -362,6 +378,14 @@ func _place_player_goal_camera(lv: Dictionary) -> void:
 		col.shape = rect
 		var corner: Vector2 = ORIGIN + Vector2(float(g[0]), float(g[1])) * CELL
 		col.position = corner + rect.size / 2.0 - goal.position
+		_goal_rect = Rect2(_scene.to_global(corner), rect.size)
+		GameManager.goal_world = _goal_rect.get_center()
+		var marker := Node2D.new()
+		marker.set_script(load(SCRIPT_MARKER) as Script)
+		marker.position = corner
+		marker.set("size", rect.size)
+		marker.set("label", String(lv.get("goal_label", "META")))
+		_scene.add_child(marker)
 
 
 # ================================================================== reglas
@@ -369,6 +393,11 @@ func _process(delta: float) -> void:
 	if not _playing:
 		return
 	_goal_msg_cooldown = maxf(_goal_msg_cooldown - delta, 0.0)
+	_obj_timer -= delta
+	if _obj_timer <= 0.0:
+		_obj_timer = 0.2
+		_update_objectives()
+		_check_goal()
 	_check_timer -= delta
 	if _check_timer <= 0.0:
 		_check_timer = 0.5
@@ -379,6 +408,58 @@ func _process(delta: float) -> void:
 			var tr: Array = level["tremors"]
 			_tremor_timer = randf_range(float(tr[0]), float(tr[1]))
 			_tremor()
+
+
+## Revisa si el jugador esta dentro de la meta: al entrar se avisa lo que falte, y si ya
+## esta todo listo, el mapa se completa SIN tener que salir y volver a entrar.
+func _check_goal() -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	var inside: bool = _goal_rect.has_point(player.global_position)
+	if inside and (_missing() == "" or not _in_goal):
+		try_finish()
+	_in_goal = inside
+
+
+## Arma la lista de objetivos del mapa (panel del HUD) y avisa cuando ya se puede ir a la meta.
+func _update_objectives() -> void:
+	var req: Dictionary = level.get("require", {})
+	var items: Array = []
+	var b_total: int = 0
+	var b_done: int = 0
+	for b in get_tree().get_nodes_in_group("edificios"):
+		if b.get("safe_to_demolish") == true:
+			b_total += 1
+			if int(b.get("state")) != 0:
+				b_done += 1
+	if bool(req.get("buildings", true)) and b_total > 0:
+		items.append({"text": "Edificios seguros  %d/%d" % [b_done, b_total], "done": b_done >= b_total, "goal": false})
+	if _rubble_total > 0:
+		var left: int = 0
+		for r in get_tree().get_nodes_in_group("escombros"):
+			if r.get("route") == true:
+				left += 1
+		items.append({"text": "Escombros del camino  %d/%d" % [_rubble_total - left, _rubble_total], "done": left == 0, "goal": false})
+	var c_total: int = get_tree().get_nodes_in_group("civiles").size()
+	var c_done: int = 0
+	for p in get_tree().get_nodes_in_group("civiles"):
+		if p.get("evacuated") == true or p.get("injured") == true:
+			c_done += 1
+	if bool(req.get("civilians", true)) and c_total > 0:
+		items.append({"text": "Personas a salvo  %d/%d" % [c_done, c_total], "done": c_done >= c_total, "goal": false})
+	var all_done: bool = true
+	for it in items:
+		if not bool(it["done"]):
+			all_done = false
+	items.append({"text": "Llegar a la %s" % GameManager.goal_label, "done": false, "goal": true})
+	var sig: String = str(items) + str(all_done)
+	if sig == _obj_sig:
+		return
+	_obj_sig = sig
+	if all_done and not GameManager.goal_ready and _playing:
+		GameManager.toast("success", "¡Todo listo!", "Ve a la %s: la zona con la bandera." % GameManager.goal_label)
+	GameManager.set_objectives(items, all_done)
 
 
 ## Lo que falta para poder terminar el mapa ("" = todo listo).
@@ -394,7 +475,7 @@ func _missing() -> String:
 	if bool(req.get("civilians", true)):
 		var c: int = 0
 		for p in get_tree().get_nodes_in_group("civiles"):
-			if p.get("evacuated") == false and p.get("injured") == false:
+			if p.has_method("is_pending") and p.call("is_pending"):
 				c += 1
 		if c > 0:
 			return "Aún hay %d persona(s) por poner a salvo." % c

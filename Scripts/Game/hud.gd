@@ -34,8 +34,10 @@ var _root: Control
 var _level: Label
 var _score: Label
 var _bombs: Label
-var _buildings: Label
-var _civilians: Label
+var _obj_panel: PanelContainer
+var _obj_box: VBoxContainer
+var _arrow: GoalArrow
+var _arrow_label: Label
 var _toasts: VBoxContainer
 var _bubble: PanelContainer
 var _bubble_name: Label
@@ -61,14 +63,15 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit_to_viewport)
 
 	_build_stats()
+	_build_objectives()
+	_build_arrow()
 	_build_toasts()
 	_build_prompt()
 	_build_bubble()
 
 	GameManager.score_changed.connect(_on_score)
 	GameManager.bombs_changed.connect(_on_bombs)
-	GameManager.buildings_changed.connect(_on_buildings)
-	GameManager.civilians_changed.connect(_on_civilians)
+	GameManager.objectives_changed.connect(_on_objectives)
 	GameManager.level_changed.connect(_on_level)
 	GameManager.toast_requested.connect(_add_toast)
 	GameManager.dialog_requested.connect(_on_dialog)
@@ -76,8 +79,7 @@ func _ready() -> void:
 	_on_level(GameManager.level_label)
 	_on_score(GameManager.score)
 	_on_bombs(GameManager.bombs)
-	_on_buildings(GameManager.buildings_cleared, GameManager.total_buildings())
-	_on_civilians(GameManager.civilians_saved, GameManager.total_civilians())
+	_on_objectives(GameManager.objectives)
 	_add_toast("info", "Controles", "WASD mover · E bomba · F usar · M música")
 
 
@@ -109,10 +111,38 @@ func _build_stats() -> void:
 	_level = _label(12, Color.WHITE)
 	_score = _label(12, GOLD)
 	_bombs = _label(12, Color("ffb703"))
-	_buildings = _label(12, Color("4cc9f0"))
-	_civilians = _label(12, Color("06d6a0"))
-	for l in [_level, _score, _bombs, _buildings, _civilians]:
+	for l in [_level, _score, _bombs]:
 		row.add_child(l)
+
+
+## Lista de objetivos (debajo de la barra): cada uno se marca al cumplirse.
+func _build_objectives() -> void:
+	_obj_panel = PanelContainer.new()
+	_obj_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_obj_panel.position = Vector2(8, 36)
+	_obj_panel.add_theme_stylebox_override("panel", UIStyle.box(PANEL_BG, 8, Color(1, 1, 1, 0.2), 1, 8.0, 4.0))
+	_obj_panel.visible = false
+	_root.add_child(_obj_panel)
+	_obj_box = VBoxContainer.new()
+	_obj_box.add_theme_constant_override("separation", 2)
+	_obj_panel.add_child(_obj_box)
+
+
+## Flecha que apunta a la META cuando ya se cumplieron todos los objetivos.
+func _build_arrow() -> void:
+	_arrow = GoalArrow.new()
+	_arrow.custom_minimum_size = Vector2(32, 32)
+	_arrow.size = Vector2(32, 32)
+	_arrow.pivot_offset = Vector2(16, 16)
+	_arrow.visible = false
+	_root.add_child(_arrow)
+	_arrow_label = _label(12, Color("06d6a0"))
+	_arrow_label.size = Vector2(80, 16)
+	_arrow_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_arrow_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_arrow_label.add_theme_constant_override("outline_size", 4)
+	_arrow_label.visible = false
+	_root.add_child(_arrow_label)
 
 
 func _build_toasts() -> void:
@@ -191,12 +221,38 @@ func _on_bombs(value: int) -> void:
 	_bombs.text = "Bombas %d" % value
 
 
-func _on_buildings(cleared: int, total: int) -> void:
-	_buildings.text = "Edificios %d/%d" % [cleared, total]
-
-
-func _on_civilians(saved: int, total: int) -> void:
-	_civilians.text = "A salvo %d/%d" % [saved, total]
+func _on_objectives(items: Array) -> void:
+	for c in _obj_box.get_children():
+		_obj_box.remove_child(c)
+		c.queue_free()
+	_obj_panel.visible = items.size() > 0
+	_obj_panel.size = Vector2.ZERO
+	if items.is_empty():
+		return
+	var title := _label(10, Color(1, 1, 1, 0.55))
+	title.text = "OBJETIVOS"
+	_obj_box.add_child(title)
+	for it in items:
+		var done: bool = bool(it["done"])
+		var is_goal: bool = bool(it["goal"])
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		_obj_box.add_child(row)
+		var icon := CheckIcon.new()
+		icon.custom_minimum_size = Vector2(13, 13)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		icon.done = done
+		icon.goal = is_goal
+		icon.goal_ready = GameManager.goal_ready
+		row.add_child(icon)
+		var color: Color = Color(1, 1, 1, 0.9)
+		if done:
+			color = Color("06d6a0")
+		elif is_goal:
+			color = Color("06d6a0") if GameManager.goal_ready else Color("ffb703")
+		var l := _label(11, color)
+		l.text = String(it["text"])
+		row.add_child(l)
 
 
 # ---------------------------------------------------------------- popups
@@ -309,6 +365,8 @@ func _process(_delta: float) -> void:
 		else:
 			_hide_bubble()
 
+	_update_arrow(player)
+
 	# Etiqueta "F  Hablar": solo si hay algo al alcance y no hay un globo abierto
 	var target: Node = null
 	if player != null:
@@ -323,6 +381,30 @@ func _process(_delta: float) -> void:
 		_prompt.visible = true
 	else:
 		_prompt.visible = false
+
+
+## Muestra la flecha hacia la META (sobre la meta si se ve, o en el borde de la pantalla si no).
+func _update_arrow(player: Node2D) -> void:
+	if not GameManager.goal_ready or player == null:
+		_arrow.visible = false
+		_arrow_label.visible = false
+		return
+	var tgt: Vector2 = _world_to_hud(GameManager.goal_world)
+	var area: Vector2 = _root.size
+	var inner := Rect2(Vector2(24, 50), area - Vector2(48, 100))
+	var bob: float = sin(float(Time.get_ticks_msec()) / 180.0) * 4.0
+	var center: Vector2
+	if inner.has_point(tgt):
+		center = tgt + Vector2(0.0, -50.0 + bob)
+		_arrow.rotation = PI / 2.0
+	else:
+		center = Vector2(clampf(tgt.x, inner.position.x, inner.end.x), clampf(tgt.y, inner.position.y, inner.end.y))
+		_arrow.rotation = (tgt - area / 2.0).angle()
+	_arrow.position = center - _arrow.size / 2.0
+	_arrow_label.text = GameManager.goal_label
+	_arrow_label.position = center + Vector2(-40.0, 20.0)
+	_arrow.visible = true
+	_arrow_label.visible = true
 
 
 func _place_bubble() -> void:
@@ -363,6 +445,33 @@ class ToastIcon extends Control:
 			_:
 				draw_circle(c + Vector2(0.0, -r * 0.5), 1.4, dark)
 				draw_line(c + Vector2(0.0, -r * 0.1), c + Vector2(0.0, r * 0.55), dark, 2.2)
+
+
+## Casilla de un objetivo: vacia, marcada (verde) o triangulo para la META.
+class CheckIcon extends Control:
+	var done: bool = false
+	var goal: bool = false
+	var goal_ready: bool = false
+
+	func _draw() -> void:
+		if goal:
+			var col := Color("06d6a0") if goal_ready else Color("ffb703")
+			draw_colored_polygon(PackedVector2Array([Vector2(2, 1), Vector2(size.x - 1, size.y / 2.0), Vector2(2, size.y - 1)]), col)
+			return
+		var r := Rect2(Vector2(1, 1), size - Vector2(2, 2))
+		draw_rect(r, Color("06d6a0") if done else Color(1, 1, 1, 0.08))
+		draw_rect(r, Color("06d6a0") if done else Color(1, 1, 1, 0.5), false, 1.5)
+		if done:
+			draw_polyline(PackedVector2Array([Vector2(3, size.y * 0.55), Vector2(size.x * 0.42, size.y - 3), Vector2(size.x - 3, 3)]), Color(0.09, 0.07, 0.2), 2.0)
+
+
+## Flecha circular que apunta hacia la META (se rota desde fuera).
+class GoalArrow extends Control:
+	func _draw() -> void:
+		var c: Vector2 = size / 2.0
+		draw_circle(c, 15.0, Color(0.09, 0.07, 0.2, 0.92))
+		draw_arc(c, 15.0, 0.0, TAU, 24, Color("06d6a0"), 2.0)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(-5, -8), c + Vector2(9, 0), c + Vector2(-5, 8)]), Color("06d6a0"))
 
 
 ## Retrato del globo: una casilla del tileset ampliada.

@@ -8,6 +8,8 @@ signal buildings_changed(cleared: int, total: int)
 signal civilians_changed(saved: int, total: int)
 ## Texto del mapa actual (ej. "Mapa 2/6") para el HUD.
 signal level_changed(text: String)
+## Lista de objetivos del mapa: [{"text": String, "done": bool, "goal": bool}, ...]
+signal objectives_changed(items: Array)
 ## Popup corto. kind: "info", "success", "warning" o "error". Si title va vacio se usa uno por defecto.
 signal toast_requested(kind: String, title: String, text: String)
 ## Globo de dialogo junto a "source" (persona, senal o edificio). portrait = casilla del tileset
@@ -30,6 +32,11 @@ var buildings_cleared: int = 0
 var civilians_saved: int = 0
 var civilians_injured: int = 0
 var level_label: String = ""
+## Objetivos del mapa y la META (para el panel de objetivos y la flecha del HUD).
+var objectives: Array = []
+var goal_ready: bool = false
+var goal_world: Vector2 = Vector2.ZERO
+var goal_label: String = "META"
 ## Contadores de decisiones del jugador (se usan en los resumenes y la retroalimentacion).
 var stats: Dictionary = {}
 var audio: AudioBank
@@ -162,6 +169,12 @@ func get_stat(key: String) -> int:
 	return int(stats.get(key, 0))
 
 
+func set_objectives(items: Array, all_done: bool) -> void:
+	objectives = items
+	goal_ready = all_done
+	objectives_changed.emit(items)
+
+
 func set_level_label(text: String) -> void:
 	level_label = text
 	level_changed.emit(text)
@@ -219,6 +232,8 @@ func reset_game() -> void:
 	buildings_cleared = 0
 	civilians_saved = 0
 	civilians_injured = 0
+	goal_ready = false
+	objectives = []
 	stats.clear()
 	score_changed.emit(score)
 	bombs_changed.emit(bombs)

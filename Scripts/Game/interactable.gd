@@ -12,7 +12,7 @@ extends Node2D
 enum Kind { PERSON, SIGN, SUPPLY }
 
 const TEXTURE: Texture2D = preload("res://Assets/Kenney/tilemap_packed.png")
-const WALK_SPEED: float = 36.0
+const WALK_SPEED: float = 60.0
 
 @export var kind: Kind = Kind.PERSON:
 	set(value):
@@ -70,6 +70,11 @@ func _process(delta: float) -> void:
 # ---------------------------------------------------------------- interaccion (tecla F)
 func can_interact() -> bool:
 	return not collected and not injured and not _walking
+
+
+## Persona que todavia hay que evacuar.
+func is_pending() -> bool:
+	return kind == Kind.PERSON and evacuable and not evacuated and not injured
 
 
 func get_prompt() -> String:
@@ -146,6 +151,11 @@ func _collect() -> void:
 
 # ---------------------------------------------------------------- evacuacion
 func _start_evacuation() -> void:
+	# La persona cuenta como "a salvo" desde que le avisas; despues camina hacia la zona segura.
+	evacuated = true
+	GameManager.civilian_saved()
+	GameManager.add_score(reward_points, "evacuar persona")
+	GameManager.toast("success", "Persona a salvo", "%s va a la zona segura. +%d" % [display_name, reward_points], "saved")
 	_walking = true
 	_walk_tween = create_tween()
 	var prev: Vector2 = position
@@ -166,10 +176,7 @@ func _face(dir: Vector2) -> void:
 
 func _on_arrived() -> void:
 	_walking = false
-	evacuated = true
-	GameManager.civilian_saved()
-	GameManager.add_score(reward_points, "evacuar persona")
-	GameManager.toast("success", "Persona a salvo", "%s está a salvo. +%d" % [display_name, reward_points], "saved")
+	_walk_col = 24
 
 
 ## Un edificio cayo con esta persona dentro del radio de peligro.
