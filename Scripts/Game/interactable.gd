@@ -124,12 +124,14 @@ func _read_sign() -> void:
 	GameManager.show_dialog(display_name, _line(0, ""), tile, self)
 	if not _read_once:
 		_read_once = true
+		GameManager.stat("signs_read")
 		GameManager.add_score(reward_points, "leer senal")
 		GameManager.toast("success", "Aprendiste algo", "+%d puntos" % reward_points)
 
 
 func _collect() -> void:
 	collected = true
+	GameManager.stat("supplies")
 	GameManager.add_score(reward_points, "recuperar recurso")
 	if reward_bombs > 0:
 		GameManager.add_bombs(reward_bombs)
@@ -175,6 +177,7 @@ func hit_by_collapse() -> void:
 	if evacuated or injured:
 		return
 	injured = true
+	GameManager.civilian_hurt()
 	_walking = false
 	if _walk_tween != null:
 		_walk_tween.kill()

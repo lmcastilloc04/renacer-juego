@@ -748,16 +748,16 @@ size = Vector2(5, 176)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qxwmm"]
 size = Vector2(5, 176)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_85gyg"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fg7i4"]
 size = Vector2(48, 40)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_c32x4"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gwne5"]
 size = Vector2(48, 56)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_fg7i4"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_op2xg"]
 size = Vector2(48, 72)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_gwne5"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1nvmp"]
 size = Vector2(48, 56)
 
 [node name="Scene_Game" type="Node2D" unique_id=1960412790]
@@ -876,7 +876,7 @@ region_rect = Rect2(272, 64, 48, 64)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Edificio_A1" unique_id=1882909603]
 position = Vector2(0, 10)
-shape = SubResource("RectangleShape2D_85gyg")
+shape = SubResource("RectangleShape2D_fg7i4")
 
 [node name="Edificio_A2" type="StaticBody2D" parent="." unique_id=175065227]
 position = Vector2(-96, 1440)
@@ -892,7 +892,7 @@ region_rect = Rect2(272, 0, 48, 64)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Edificio_A2" unique_id=416124530]
 position = Vector2(0, 2)
-shape = SubResource("RectangleShape2D_c32x4")
+shape = SubResource("RectangleShape2D_gwne5")
 
 [node name="Edificio_B1" type="StaticBody2D" parent="." unique_id=1123045811]
 position = Vector2(24, 1440)
@@ -908,7 +908,7 @@ region_rect = Rect2(320, 0, 48, 64)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Edificio_B1" unique_id=215819662]
 position = Vector2(0, -6)
-shape = SubResource("RectangleShape2D_fg7i4")
+shape = SubResource("RectangleShape2D_op2xg")
 
 [node name="Edificio_B2" type="StaticBody2D" parent="." unique_id=1359292682]
 position = Vector2(112, 1440)
@@ -925,7 +925,7 @@ region_rect = Rect2(272, 0, 48, 64)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Edificio_B2" unique_id=1477826881]
 position = Vector2(0, 2)
-shape = SubResource("RectangleShape2D_gwne5")
+shape = SubResource("RectangleShape2D_1nvmp")
 
 [node name="NPC_Mora" type="Node2D" parent="." unique_id=1681943075]
 position = Vector2(-152, 1456)

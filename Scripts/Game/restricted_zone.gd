@@ -21,6 +21,8 @@ var _cooldown: float = 0.0
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
+		return
+	add_to_group("zonas")
 
 
 func _process(delta: float) -> void:
@@ -32,6 +34,7 @@ func _process(delta: float) -> void:
 	if inside and not _inside and _cooldown <= 0.0:
 		_cooldown = COOLDOWN
 		GameManager.add_score(-penalty, "zona restringida")
+		GameManager.stat("zone_entries")
 		GameManager.toast("warning", zone_name, "%s -%d puntos" % [reason, penalty])
 		if player.has_method("flash_hurt"):
 			player.call("flash_hurt")

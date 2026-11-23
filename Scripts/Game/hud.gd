@@ -31,6 +31,7 @@ const MAX_TOASTS: int = 2
 const BUBBLE_RANGE: float = 70.0
 
 var _root: Control
+var _level: Label
 var _score: Label
 var _bombs: Label
 var _buildings: Label
@@ -68,9 +69,11 @@ func _ready() -> void:
 	GameManager.bombs_changed.connect(_on_bombs)
 	GameManager.buildings_changed.connect(_on_buildings)
 	GameManager.civilians_changed.connect(_on_civilians)
+	GameManager.level_changed.connect(_on_level)
 	GameManager.toast_requested.connect(_add_toast)
 	GameManager.dialog_requested.connect(_on_dialog)
 
+	_on_level(GameManager.level_label)
 	_on_score(GameManager.score)
 	_on_bombs(GameManager.bombs)
 	_on_buildings(GameManager.buildings_cleared, GameManager.total_buildings())
@@ -103,11 +106,12 @@ func _build_stats() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
+	_level = _label(12, Color.WHITE)
 	_score = _label(12, GOLD)
 	_bombs = _label(12, Color("ffb703"))
 	_buildings = _label(12, Color("4cc9f0"))
 	_civilians = _label(12, Color("06d6a0"))
-	for l in [_score, _bombs, _buildings, _civilians]:
+	for l in [_level, _score, _bombs, _buildings, _civilians]:
 		row.add_child(l)
 
 
@@ -175,6 +179,10 @@ func _build_bubble() -> void:
 
 
 # ---------------------------------------------------------------- estadisticas
+func _on_level(text: String) -> void:
+	_level.text = text
+
+
 func _on_score(value: int) -> void:
 	_score.text = "Puntos %d" % value
 

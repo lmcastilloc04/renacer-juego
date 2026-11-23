@@ -6,6 +6,8 @@ signal score_changed(new_score: int)
 signal bombs_changed(new_bombs: int)
 signal buildings_changed(cleared: int, total: int)
 signal civilians_changed(saved: int, total: int)
+## Texto del mapa actual (ej. "Mapa 2/6") para el HUD.
+signal level_changed(text: String)
 ## Popup corto. kind: "info", "success", "warning" o "error". Si title va vacio se usa uno por defecto.
 signal toast_requested(kind: String, title: String, text: String)
 ## Globo de dialogo junto a "source" (persona, senal o edificio). portrait = casilla del tileset
@@ -26,6 +28,10 @@ var mission_finished: bool = false
 var bombs: int = START_BOMBS
 var buildings_cleared: int = 0
 var civilians_saved: int = 0
+var civilians_injured: int = 0
+var level_label: String = ""
+## Contadores de decisiones del jugador (se usan en los resumenes y la retroalimentacion).
+var stats: Dictionary = {}
 var audio: AudioBank
 
 
@@ -127,6 +133,7 @@ func total_buildings() -> int:
 
 func building_cleared() -> void:
 	buildings_cleared += 1
+	stat("bld_cleared")
 	buildings_changed.emit(buildings_cleared, total_buildings())
 
 
@@ -137,6 +144,41 @@ func total_civilians() -> int:
 
 func civilian_saved() -> void:
 	civilians_saved += 1
+	stat("civ_saved")
+	civilians_changed.emit(civilians_saved, total_civilians())
+
+
+func civilian_hurt() -> void:
+	civilians_injured += 1
+	stat("civ_injured")
+
+
+# ------------------------------------------------------------------ estadisticas y mapas
+func stat(key: String, amount: int = 1) -> void:
+	stats[key] = int(stats.get(key, 0)) + amount
+
+
+func get_stat(key: String) -> int:
+	return int(stats.get(key, 0))
+
+
+func set_level_label(text: String) -> void:
+	level_label = text
+	level_changed.emit(text)
+
+
+## Al empezar un mapa: bombas del mapa y contadores del mapa en cero.
+func reset_level_counters(start_bombs: int) -> void:
+	bombs = start_bombs
+	buildings_cleared = 0
+	civilians_saved = 0
+	civilians_injured = 0
+	bombs_changed.emit(bombs)
+	refresh_counters()
+
+
+func refresh_counters() -> void:
+	buildings_changed.emit(buildings_cleared, total_buildings())
 	civilians_changed.emit(civilians_saved, total_civilians())
 
 
@@ -176,5 +218,7 @@ func reset_game() -> void:
 	bombs = START_BOMBS
 	buildings_cleared = 0
 	civilians_saved = 0
+	civilians_injured = 0
+	stats.clear()
 	score_changed.emit(score)
 	bombs_changed.emit(bombs)

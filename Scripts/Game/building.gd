@@ -136,6 +136,7 @@ func evaluate() -> void:
 	else:
 		if first_time:
 			GameManager.add_score(25, "detectar estructura comprometida")
+			GameManager.stat("unsafe_detected")
 		GameManager.show_dialog("Evaluación", unsafe_reason + " NO lo demuelas.", Vector2i(-1, -1), self)
 
 
@@ -148,6 +149,7 @@ func receive_blast() -> void:
 		if not _unsafe_warned:
 			_unsafe_warned = true
 			GameManager.add_score(-40, "demolicion insegura")
+			GameManager.stat("unsafe_attempts")
 			GameManager.toast("error", "Demolición insegura", "Estructura comprometida. -40 puntos")
 		return
 	hits += 1
@@ -167,7 +169,9 @@ func _collapse() -> void:
 	if evaluated:
 		points = 40 * floors
 		text = "Lo evaluaste antes. +%d puntos" % points
+		GameManager.stat("eval_before")
 	else:
+		GameManager.stat("demo_no_eval")
 		points = 15 * floors - 25
 		text = "No lo evaluaste. %+d puntos" % points
 	GameManager.add_score(points, "demolicion")
@@ -176,6 +180,7 @@ func _collapse() -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player != null and player.global_position.distance_to(center()) <= danger_radius():
 		GameManager.add_score(-30, "demasiado cerca al caer")
+		GameManager.stat("too_close")
 		GameManager.toast("error", "¡Demasiado cerca!", "Estabas en el círculo rojo. -30")
 		if player.has_method("flash_hurt"):
 			player.call("flash_hurt")
