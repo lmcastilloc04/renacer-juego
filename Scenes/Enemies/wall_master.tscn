@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://ch43ahwokxvcx"]
+
+[ext_resource type="Script" uid="uid://dnq3qdumxc36f" path="res://Scenes/Enemies/wall_master.gd" id="1_2rciy"]
+[ext_resource type="Texture2D" uid="uid://crxlmj63qgun5" path="res://Assets/Enemies/03_Underworld_Enemies/Wall_Master_Down_Right.png" id="2_0h7av"]
+[ext_resource type="PackedScene" uid="uid://cc23fkyhkcfbr" path="res://PackPlayerOctorok/FV_death_expand.tscn" id="2_hsh48"]
+[ext_resource type="PackedScene" uid="uid://pwqmuayeif58" path="res://PackPlayerOctorok/FV_death_effect.tscn" id="3_c1bvr"]
+[ext_resource type="Texture2D" uid="uid://b0u25mxutdrxe" path="res://Assets/Enemies/03_Underworld_Enemies/Wall_Master_Down_Left.png" id="3_mttk8"]
+[ext_resource type="Texture2D" uid="uid://vuui2likwjl8" path="res://Assets/Enemies/03_Underworld_Enemies/Wall_Master_Up_Right.png" id="4_02i1j"]
+[ext_resource type="PackedScene" uid="uid://bwjbdgqs4j5x4" path="res://PackPlayerOctorok/FV_rupia.tscn" id="4_4t64k"]
+[ext_resource type="Texture2D" uid="uid://bunl8a70w8dcc" path="res://Assets/Enemies/03_Underworld_Enemies/Wall_Master_Up_Left.png" id="5_hsh48"]
+[ext_resource type="PackedScene" uid="uid://bn7oih70cfxq3" path="res://PackPlayerOctorok/FV_heart.tscn" id="5_mlvsb"]
+[ext_resource type="AudioStream" uid="uid://x6ewlht05y30" path="res://PackPlayerOctorok/07_Effects Sounds/Explosion.wav" id="10_c1bvr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c1bvr"]
+atlas = ExtResource("2_0h7av")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4t64k"]
+atlas = ExtResource("2_0h7av")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mlvsb"]
+atlas = ExtResource("3_mttk8")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4r8mh"]
+atlas = ExtResource("3_mttk8")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c7yn0"]
+atlas = ExtResource("4_02i1j")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p7fou"]
+atlas = ExtResource("4_02i1j")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w227x"]
+atlas = ExtResource("5_hsh48")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4w5rv"]
+atlas = ExtResource("5_hsh48")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jc5dv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c1bvr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4t64k")
+}],
+"loop": 1,
+"name": &"walk_down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mlvsb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4r8mh")
+}],
+"loop": 1,
+"name": &"walk_left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c7yn0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p7fou")
+}],
+"loop": 1,
+"name": &"walk_right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w227x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4w5rv")
+}],
+"loop": 1,
+"name": &"walk_up",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5ibsp"]
+radius = 6.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jc5dv"]
+
+[node name="WallMaster" type="CharacterBody2D" unique_id=951056446 groups=["ENEMIGOS"]]
+collision_layer = 524288
+collision_mask = 513
+script = ExtResource("1_2rciy")
+death_expand_scene = ExtResource("2_hsh48")
+death_effect_scene = ExtResource("3_c1bvr")
+rupie_scene = ExtResource("4_4t64k")
+heart_scene = ExtResource("5_mlvsb")
+metadata/_edit_group_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1295815144]
+sprite_frames = SubResource("SpriteFrames_jc5dv")
+animation = &"walk_down"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2096536352]
+shape = SubResource("CircleShape2D_5ibsp")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=826995926 groups=["ENEMIGOS"]]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1800594871]
+shape = SubResource("RectangleShape2D_jc5dv")
+
+[node name="Audioexplosion" type="AudioStreamPlayer2D" parent="." unique_id=255442909]
+stream = ExtResource("10_c1bvr")

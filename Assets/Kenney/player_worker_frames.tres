@@ -1,0 +1,166 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://dwih7ypuxoruc"]
+
+[ext_resource type="Texture2D" uid="uid://cuhbjcimqpxrp" path="res://Assets/Kenney/tilemap_packed.png" id="1_tex"]
+
+[sub_resource type="AtlasTexture" id="atlas_24_10"]
+atlas = ExtResource("1_tex")
+region = Rect2(384, 160, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_24_9"]
+atlas = ExtResource("1_tex")
+region = Rect2(384, 144, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_23_10"]
+atlas = ExtResource("1_tex")
+region = Rect2(368, 160, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_23_9"]
+atlas = ExtResource("1_tex")
+region = Rect2(368, 144, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_26_10"]
+atlas = ExtResource("1_tex")
+region = Rect2(416, 160, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_26_9"]
+atlas = ExtResource("1_tex")
+region = Rect2(416, 144, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_25_10"]
+atlas = ExtResource("1_tex")
+region = Rect2(400, 160, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_25_9"]
+atlas = ExtResource("1_tex")
+region = Rect2(400, 144, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_24_11"]
+atlas = ExtResource("1_tex")
+region = Rect2(384, 176, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_23_11"]
+atlas = ExtResource("1_tex")
+region = Rect2(368, 176, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_26_11"]
+atlas = ExtResource("1_tex")
+region = Rect2(416, 176, 16, 16)
+
+[sub_resource type="AtlasTexture" id="atlas_25_11"]
+atlas = ExtResource("1_tex")
+region = Rect2(400, 176, 16, 16)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_24_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_24_9")
+}],
+"loop": 0,
+"name": &"Sword_Down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_23_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_23_9")
+}],
+"loop": 0,
+"name": &"Sword_Left",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_26_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_26_9")
+}],
+"loop": 0,
+"name": &"Sword_Right",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_25_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_25_9")
+}],
+"loop": 0,
+"name": &"Sword_Up",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_24_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_24_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_24_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_24_11")
+}],
+"loop": 1,
+"name": &"walk_down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_23_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_23_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_23_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_23_11")
+}],
+"loop": 1,
+"name": &"walk_left",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_26_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_26_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_26_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_26_11")
+}],
+"loop": 1,
+"name": &"walk_right",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("atlas_25_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_25_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_25_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("atlas_25_11")
+}],
+"loop": 1,
+"name": &"walk_up",
+"speed": 8.0
+}]

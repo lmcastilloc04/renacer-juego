@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://dpr583qj3nufj"]
+
+[ext_resource type="Script" uid="uid://cscvop6cslbgt" path="res://PackPlayerOctorok/FV_player.gd" id="1_jkmaf"]
+[ext_resource type="PackedScene" uid="uid://wr75fxukblqg" path="res://PackPlayerOctorok/FV_sword_magic.tscn" id="2_iki7i"]
+[ext_resource type="SpriteFrames" uid="uid://dwih7ypuxoruc" path="res://Assets/Kenney/player_worker_frames.tres" id="3_s28uu"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ewtop"]
+radius = 5.0
+height = 10.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bvdh4"]
+radius = 2.0
+
+[node name="FV_player" type="CharacterBody2D" unique_id=1310794064]
+collision_layer = 2
+collision_mask = 513
+script = ExtResource("1_jkmaf")
+sword_magic_scene = ExtResource("2_iki7i")
+metadata/_edit_group_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=463707776]
+texture_filter = 1
+sprite_frames = ExtResource("3_s28uu")
+animation = &"walk_up"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1635992074]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_ewtop")
+
+[node name="SwordHitbox" type="Area2D" parent="." unique_id=1179246644]
+position = Vector2(0, 14)
+collision_layer = 4
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SwordHitbox" unique_id=439519194]
+position = Vector2(0.5, 0)
+shape = SubResource("CircleShape2D_bvdh4")
+
+[connection signal="area_entered" from="SwordHitbox" to="." method="_on_sword_hitbox_area_entered"]

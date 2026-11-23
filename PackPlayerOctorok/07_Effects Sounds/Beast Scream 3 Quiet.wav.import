@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bvwdmwq4yle3w"
+path="res://.godot/imported/Beast Scream 3 Quiet.wav-e5dcdd4950fa080e3d7e71e6ceebb0ab.sample"
+
+[deps]
+
+source_file="res://PackPlayerOctorok/07_Effects Sounds/Beast Scream 3 Quiet.wav"
+dest_files=["res://.godot/imported/Beast Scream 3 Quiet.wav-e5dcdd4950fa080e3d7e71e6ceebb0ab.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
